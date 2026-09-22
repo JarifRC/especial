@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para [Nombre] ✨💛</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #05020a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #heart-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+        }
+
+        .music-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #ffd700;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 290px;
+            height: 195px;
+            background: #800f2f;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 77, 109, 0.4);
+            perspective: 1000px;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .envelope-wrapper::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 145px solid #a4133c;
+            border-right: 145px solid #a4133c;
+            border-top: 100px solid transparent;
+            border-bottom: 95px solid #590d22;
+            border-radius: 0 0 12px 12px;
+            z-index: 3;
+        }
+
+        .envelope-wrapper .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 145px solid transparent;
+            border-right: 145px solid transparent;
+            border-top: 105px solid #c9184a;
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out;
+            z-index: 4;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+
+        .envelope-wrapper .seal {
+            position: absolute;
+            top: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ffe600 0%, #b8860b 100%);
+            border-radius: 50%;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            font-size: 20px;
+            color: #590d22;
+            font-weight: bold;
+        }
+
+        .btn-open {
+            margin-top: 35px;
+            padding: 14px 40px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #000;
+            background: linear-gradient(135deg, #fff3b0 0%, #ffd700 50%, #ffb703 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 20;
+        }
+
+        .card-content {
+            position: absolute;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8) translateY(30px);
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .flowers-svg {
+            width: 320px;
+            height: 240px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .letter-card {
+            background: rgba(15, 10, 25, 0.7);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 30px 25px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.15);
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .letter-title {
+            font-family: 'Caveat', cursive;
+            font-size: 2.5rem;
+            color: #ffd700;
+            margin-bottom: 12px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .letter-body {
+            color: #f8f9fa;
+            font-size: 0.98rem;
+            line-height: 1.7;
+            margin-bottom: 18px;
+            font-weight: 300;
+        }
+
+        .letter-footer {
+            font-family: 'Caveat', cursive;
+            font-size: 1.8rem;
+            color: #ffd700;
+        }
+
+        .open .flap { transform: rotateX(180deg); z-index: 1; }
+        .open .seal { opacity: 0; }
+        .open .envelope-wrapper { transform: translateY(120px) scale(0.5); opacity: 0; pointer-events: none; }
+        .open .btn-open { opacity: 0; pointer-events: none; }
+        .open .card-content { opacity: 1; visibility: visible; transform: scale(1) translateY(0); transition-delay: 0.4s; }
+    </style>
+</head>
+<body>
+
+    <button class="music-btn" id="musicBtn" onclick="toggleAudio()">
+        <span id="musicIcon">🎵</span> <span id="musicText">Pausar</span>
+    </button>
+
+    <canvas id="heart-canvas"></canvas>
+
+    <div class="container" id="mainContainer">
+        <div class="envelope-wrapper">
+            <div class="flap"></div>
+            <div class="seal">N</div>
+        </div>
+
+        <button class="btn-open" onclick="openLetter()">Abrir 💛</button>
+
+        <div class="card-content">
+            <svg class="flowers-svg" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="stemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#52b788"/>
+                        <stop offset="100%" stop-color="#1b4332"/>
+                    </linearGradient>
+                    
+                    <linearGradient id="petalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#fff066"/>
+                        <stop offset="50%" stop-color="#ffd700"/>
+                        <stop offset="100%" stop-color="#ff9100"/>
+                    </linearGradient>
+
+                    <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#542e0c"/>
+                        <stop offset="80%" stop-color="#2d1502"/>
+                        <stop offset="100%" stop-color="#120700"/>
+                    </radialGradient>
+                </defs>
+
+                <!-- Tallos -->
+                <path d="M160 240 L160 100" stroke="url(#stemGrad)" stroke-width="7" stroke-linecap="round"/>
+                <path d="M160 180 L85 110" stroke="url(#stemGrad)" stroke-width="5" stroke-linecap="round"/>
+                <path d="M160 180 L235 110" stroke="url(#stemGrad)" stroke-width="5" stroke-linecap="round"/>
+
+                <!-- Hojas -->
+                <path d="M160 170 Q120 150 120 175 Q140 185 160 175 Z" fill="#2d6a4f" stroke="#52b788" stroke-width="1"/>
+                <path d="M160 170 Q200 150 200 175 Q180 185 160 175 Z" fill="#2d6a4f" stroke="#52b788" stroke-width="1"/>
+
+                <!-- Flor Izquierda -->
+                <g>
+                    <circle cx="85" cy="96" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="99" cy="110" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="85" cy="124" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="71" cy="110" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="75" cy="100" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="95" cy="100" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="95" cy="120" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="75" cy="120" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="85" cy="110" r="10" fill="#ffaa00"/>
+                </g>
+
+                <!-- Flor Derecha -->
+                <g>
+                    <circle cx="235" cy="96" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="249" cy="110" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="235" cy="124" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="221" cy="110" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="225" cy="100" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="245" cy="100" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="245" cy="120" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="225" cy="120" r="11" fill="url(#petalGrad)"/>
+                    <circle cx="235" cy="110" r="10" fill="#ffaa00"/>
+                </g>
+
+                <!-- Girasol Principal Central -->
+                <g>
+                    <ellipse cx="160" cy="45" rx="8" ry="20" fill="url(#petalGrad)"/>
+                    <ellipse cx="160" cy="115" rx="8" ry="20" fill="url(#petalGrad)"/>
+                    <ellipse cx="125" cy="80" rx="20" ry="8" fill="url(#petalGrad)"/>
+                    <ellipse cx="195" cy="80" rx="20" ry="8" fill="url(#petalGrad)"/>
+                    
+                    <ellipse cx="135" cy="55" rx="10" ry="20" fill="url(#petalGrad)" transform="rotate(-45 135 55)"/>
+                    <ellipse cx="185" cy="55" rx="10" ry="20" fill="url(#petalGrad)" transform="rotate(45 185 55)"/>
+                    <ellipse cx="135" cy="105" rx="10" ry="20" fill="url(#petalGrad)" transform="rotate(45 135 105)"/>
+                    <ellipse cx="185" cy="105" rx="10" ry="20" fill="url(#petalGrad)" transform="rotate(-45 185 105)"/>
+
+                    <ellipse cx="147" cy="48" rx="8" ry="18" fill="url(#petalGrad)" transform="rotate(-22.5 147 48)"/>
+                    <ellipse cx="173" cy="48" rx="8" ry="18" fill="url(#petalGrad)" transform="rotate(22.5 173 48)"/>
+                    <ellipse cx="147" cy="112" rx="8" ry="18" fill="url(#petalGrad)" transform="rotate(22.5 147 112)"/>
+                    <ellipse cx="173" cy="112" rx="8" ry="18" fill="url(#petalGrad)" transform="rotate(-22.5 173 112)"/>
+
+                    <!-- Centro Semillas -->
+                    <circle cx="160" cy="80" r="22" fill="url(#centerGrad)" stroke="#ffd700" stroke-width="2"/>
+                    <circle cx="160" cy="80" r="15" fill="none" stroke="#ff9100" stroke-width="1.5" stroke-dasharray="3,3"/>
+                </g>
+            </svg>
+
+            <div class="letter-card">
+                <h1 class="letter-title">Para la persona más especial: [Nombre] ✨</h1>
+                <p class="letter-body">
+                    Hay personas que llegan a la vida de uno y, sin pedir permiso, la llenan de una luz inmensa. Tú eres una de esas personas tan escasas, bonitas e inolvidables.<br><br>
+                    Quería regalarte un rincón especial hecho solo para ti, de estrellas que no se apagan y flores doradas que nunca se marchitan. Un pequeño refugio de luz donde puedas recordar lo infinitamente valiosa que eres.
+                </p>
+                <div class="letter-footer">Con todo mi cariño, hoy y siempre 💛</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('heart-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initCosmos();
+        }
+
+        let heartParticles = [];
+        let galaxies = [];
+        let stars = [];
+        const particleCount = 350;
+
+        function heartShape(t) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+            return { x, y };
+        }
+
+        function createGalaxy(x, y, scale, speed, arms, color) {
+            let particles = [];
+            let totalParticles = 140;
+            let b = 0.22;
+
+            for (let i = 0; i < totalParticles; i++) {
+                let theta = (i / totalParticles) * Math.PI * 6;
+                let armOffset = ((i % arms) * (2 * Math.PI / arms));
+                let angle = theta + armOffset;
+                let r = 2.5 * Math.exp(b * theta) * scale;
+                let noise = (Math.random() - 0.5) * r * 0.25;
+
+                particles.push({
+                    r: r + noise,
+                    angle: angle,
+                    size: Math.random() * 1.5 + 0.8,
+                    alpha: Math.random() * 0.7 + 0.3
+                });
+            }
+
+            return { x, y, particles, speed, color, rotation: Math.random() * Math.PI * 2 };
+        }
+
+        function initCosmos() {
+            heartParticles = [];
+            for (let i = 0; i < particleCount; i++) {
+                const t = Math.random() * Math.PI * 2;
+                const pos = heartShape(t);
+                const scale = Math.min(canvas.width, canvas.height) / 38;
+                
+                heartParticles.push({
+                    baseX: pos.x * scale,
+                    baseY: pos.y * scale,
+                    size: Math.random() * 2 + 1,
+                    color: Math.random() > 0.3 ? '#ffd700' : '#ff4d6d',
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.03 + 0.01,
+                    jitter: (Math.random() - 0.5) * 8
+                });
+            }
+
+            galaxies = [
+                createGalaxy(canvas.width * 0.15, canvas.height * 0.2, 0.7, 0.003, 2, '#ffd700'),
+                createGalaxy(canvas.width * 0.85, canvas.height * 0.25, 0.8, -0.002, 3, '#ff4d6d'),
+                createGalaxy(canvas.width * 0.18, canvas.height * 0.8, 0.65, 0.0025, 2, '#e0aaff')
+            ];
+
+            stars = [];
+            const numStars = 25;
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 5 + 3,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.02 + 0.005,
+                    rotSpeed: (Math.random() - 0.5) * 0.02,
+                    angle: Math.random() * Math.PI
+                });
+            }
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        let time = 0;
+
+        function drawMathStar(x, y, size, angle, alpha) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = '#ffd700';
+            ctx.fillStyle = '#ffffff';
+            ctx.lineWidth = 0.8;
+
+            ctx.beginPath();
+            ctx.moveTo(-size, 0); ctx.lineTo(size, 0);
+            ctx.moveTo(0, -size); ctx.lineTo(0, size);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, -size * 0.4);
+            ctx.lineTo(size * 0.4, 0);
+            ctx.lineTo(0, size * 0.4);
+            ctx.lineTo(-size * 0.4, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            galaxies.forEach(g => {
+                g.rotation += g.speed;
+                g.particles.forEach(p => {
+                    let currentAngle = p.angle + g.rotation;
+                    let px = g.x + Math.cos(currentAngle) * p.r;
+                    let py = g.y + Math.sin(currentAngle) * p.r;
+
+                    ctx.beginPath();
+                    ctx.arc(px, py, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = g.color;
+                    ctx.globalAlpha = p.alpha * 0.65;
+                    ctx.fill();
+                });
+
+                ctx.beginPath();
+                ctx.arc(g.x, g.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.globalAlpha = 0.9;
+                ctx.fill();
+            });
+
+            stars.forEach(s => {
+                s.alpha += s.speed;
+                s.angle += s.rotSpeed;
+                let currentAlpha = (Math.sin(s.alpha) + 1) / 2;
+                drawMathStar(s.x, s.y, s.size, s.angle, currentAlpha * 0.8);
+            });
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 - 20;
+            const pulse = 1 + Math.sin(time * 2) * 0.05;
+
+            heartParticles.forEach(p => {
+                p.alpha += p.speed;
+                const currentAlpha = Math.abs(Math.sin(p.alpha));
+
+                const px = centerX + (p.baseX + Math.sin(time + p.jitter) * 3) * pulse;
+                const py = centerY + (p.baseY + Math.cos(time + p.jitter) * 3) * pulse;
+
+                ctx.beginPath();
+                ctx.arc(px, py, p.size * pulse, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = currentAlpha;
+                ctx.fill();
+            });
+
+            ctx.globalAlpha = 1;
+            time += 0.02;
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        let audioCtx = null;
+        let isPlaying = false;
+        let audioTimer = null;
+
+        function startAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playMelody() {
+            startAudioContext();
+            if (isPlaying) return;
+
+            const notes = [261.63, 329.63, 392.00, 493.88, 523.25, 392.00, 329.63, 261.63];
+            let noteIdx = 0;
+
+            isPlaying = true;
+            document.getElementById('musicText').innerText = "Pausar";
+
+            audioTimer = setInterval(() => {
+                if (!isPlaying) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(notes[noteIdx], audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.2);
+                
+                noteIdx = (noteIdx + 1) % notes.length;
+            }, 600);
+        }
+
+        function toggleAudio() {
+            if (isPlaying) {
+                isPlaying = false;
+                clearInterval(audioTimer);
+                document.getElementById('musicText').innerText = "Música";
+            } else {
+                playMelody();
+            }
+        }
+
+        const autoPlayHandler = () => {
+            startAudioContext();
+            playMelody();
+            document.removeEventListener('click', autoPlayHandler);
+            document.removeEventListener('touchstart', autoPlayHandler);
+        };
+
+        document.addEventListener('click', autoPlayHandler);
+        document.addEventListener('touchstart', autoPlayHandler);
+
+        function openLetter() {
+            document.getElementById('mainContainer').classList.add('open');
+            playMelody();
+
+            setTimeout(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#ffd700', '#ff4d6d', '#ffffff']
+                });
+            }, 600);
+        }
+    </script>
+</body>
+</html>
